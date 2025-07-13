@@ -1,0 +1,30 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+# Load the dataset
+data = pd.read_csv('https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv')
+# Handle missing values (for simplicity, fill NA with median values)
+data['Age'].fillna(data['Age'].median(), inplace=True)
+data['Embarked'].fillna(data['Embarked'].mode()[0], inplace=True)
+# Convert categorical variables
+data['Sex'] = LabelEncoder().fit_transform(data['Sex'])
+data = pd.get_dummies(data, columns=['Embarked'], drop_first=True)
+# Feature selection
+features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Embarked_Q', 'Embarked_S']
+X = data[features]
+y = data['Survived']
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Initialize the Random Forest model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+# Train the model
+model.fit(X_train, y_train)
+# Make predictions
+y_pred = model.predict(X_test)
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+print(f'Accuracy: {accuracy}')
+print(f'Confusion Matrix: \n{conf_matrix}')

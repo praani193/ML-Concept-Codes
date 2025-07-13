@@ -1,0 +1,58 @@
+# Importing necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.svm import SVC
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import classification_report, accuracy_score
+
+# Sample dataset
+# Example dataset with two columns: 'text' and 'category'
+data = {
+    'text': [
+        'He has a solid background in IT and education.',
+        'With more than 10 years of software development experience.',
+        'And 1 year as an Assistant Professor.',
+        'In addition to his professional experience.',
+        'His educational journey started with S.S.C. at Navodaya Vidyalaya.',
+        'Under the CBSE curriculum.'
+    ],
+    'category': ['He', 'years', 'years', 'in', 'He', 'the']
+}
+
+# Convert the data into a DataFrame
+df = pd.DataFrame(data)
+
+# Checking the distribution of categories to ensure balance
+print("Category Distribution:")
+print(df['category'].value_counts())
+
+# Splitting the dataset into features (X) and labels (y)
+X = df['text']
+y = df['category']
+
+# Splitting into training and testing data (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Vectorizing the text data and using SVM for classification
+# Creating a pipeline: TF-IDF vectorization + SVM classifier
+model = make_pipeline(TfidfVectorizer(), SVC(kernel='linear'))
+
+# Training the SVM model
+model.fit(X_train, y_train)
+
+# Predicting the test data
+y_pred = model.predict(X_test)
+
+# Evaluating the model
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, zero_division=0))
+
+print("Accuracy Score:")
+print(accuracy_score(y_test, y_pred))
+
+# To visualize the test results:
+print("\nTest Data vs Predicted Categories:")
+for i in range(len(X_test)):
+    print(f"Text: {X_test.iloc[i]}")
+    print(f"True Category: {y_test.iloc[i]}, Predicted Category: {y_pred[i]}\n")
