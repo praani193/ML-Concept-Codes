@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+import os
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, roc_curve, auc
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+
+msg = pd.read_csv('document.csv', names=['message', 'label'])
+print("Total Instances of Dataset: ", msg.shape[0])
+
+msg['labelnum'] = msg.label.map({'pos': 1, 'neg': 0})
+
+X = msg.message
+y = msg.labelnum
+Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, test_size=0.25)
+
+# Vectorize the text data
+count_v = CountVectorizer()
+Xtrain_dm = count_v.fit_transform(Xtrain)
+Xtest_dm = count_v.transform(Xtest)
+
+# Train the Naive Bayes model
+clf = MultinomialNB()
+clf.fit(Xtrain_dm, ytrain)
+
+# Make predictions
+pred = clf.predict(Xtest_dm)
+pred_proba = clf.predict_proba(Xtest_dm)[:, 1]  # Get the probability of positive class
+
+# Evaluation Metrics
+print('Accuracy Metrics: \n')
+print('Accuracy: ', accuracy_score(ytest, pred))
+print('Recall: ', recall_score(ytest, pred))
+print('Precision: ', precision_score(ytest, pred))
+cm = confusion_matrix(ytest, pred)
+print('Confusion Matrix: \n', cm)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Negative', 'Positive'], yticklabels=['Negative', 'Positive'])
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+fpr, tpr, _ = roc_curve(ytest, pred_proba)
+roc_auc = auc(fpr, tpr)
+
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc="lower right")
+plt.show()

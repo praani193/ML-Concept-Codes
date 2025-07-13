@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Load the digits dataset
+digits = load_digits()
+
+# Split the data into features (X) and labels (y)
+X = digits.data
+y = digits.target
+
+# Split the data into training and testing sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale the data (important for SVM performance)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Implement Support Vector Machine (SVM) classifier
+svm_model = SVC(kernel='linear')  # Using a linear kernel
+svm_model.fit(X_train, y_train)
+y_pred_svm = svm_model.predict(X_test)
+
+# Accuracy of SVM model
+svm_accuracy = accuracy_score(y_test, y_pred_svm)
+print(f"Accuracy of SVM model: {svm_accuracy:.4f}")
+
+# Classification report for SVM
+print("\nClassification Report for SVM:\n", classification_report(y_test, y_pred_svm))
+
+# Implement Logistic Regression
+logreg_model = LogisticRegression(max_iter=10000)  # Increase max_iter to ensure convergence
+logreg_model.fit(X_train, y_train)
+y_pred_logreg = logreg_model.predict(X_test)
+
+# Accuracy of Logistic Regression model
+logreg_accuracy = accuracy_score(y_test, y_pred_logreg)
+print(f"\nAccuracy of Logistic Regression model: {logreg_accuracy:.4f}")
+
+# Classification report for Logistic Regression
+print("\nClassification Report for Logistic Regression:\n", classification_report(y_test, y_pred_logreg))
+
+# Comparison of accuracies
+models = ['SVM', 'Logistic Regression']
+accuracies = [svm_accuracy, logreg_accuracy]
+
+plt.bar(models, accuracies, color=['blue', 'green'])
+plt.title('Comparison of Accuracy between SVM and Logistic Regression')
+plt.ylabel('Accuracy')
+plt.show()
